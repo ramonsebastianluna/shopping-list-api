@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 
@@ -38,6 +39,20 @@ class AuthController extends Controller
     }
 
     public function login(Request $request) {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+        
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            $token = $user->createToken('Token')->plainTextToken;
+            $cookie = cookie('cookie_token', $token, 60 * 24);
+            return response(['token' => $token], Response::HTTP_OK)->withoutCookie($cookie);
+        } else {
+            return response(['message' => 'invalid credentials'], Response::HTTP_UNAUTHORIZED);
+        }
+        
         return response()->json([
             'message' => 'método login ok',
         ]);
