@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Cookie;
 
 
 class AuthController extends Controller
@@ -48,14 +49,14 @@ class AuthController extends Controller
             $user = Auth::user();
             $token = $user->createToken('Token')->plainTextToken;
             $cookie = cookie('cookie_token', $token, 60 * 24);
-            return response(['token' => $token], Response::HTTP_OK)->withoutCookie($cookie);
+            return response([
+                'message' => "successfully logged in",
+                'status_code' => 200,
+                'token' => $token
+            ], Response::HTTP_OK)->withoutCookie($cookie);
         } else {
             return response(['message' => 'invalid credentials'], Response::HTTP_UNAUTHORIZED);
         }
-        
-        return response()->json([
-            'message' => 'método login ok',
-        ]);
     }
 
     public function userProfile(Request $request) {
@@ -65,9 +66,11 @@ class AuthController extends Controller
     }
 
     public function logout() {
-        return response()->json([
-            'message' => 'método logout ok',
-        ]);
+        $cookie = Cookie::forget('cookie_token');
+        
+        return response([
+            "message"=>"successfully logged out"
+        ], Response::HTTP_OK)->withCookie($cookie);
     }
 
     public function allUsers() {
