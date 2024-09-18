@@ -48,14 +48,14 @@ class AuthController extends Controller
             $user = Auth::user();
             $token = $user->createToken('Token')->plainTextToken;
             $cookie = cookie('cookie_token', $token, 60 * 24);
-            return response(['token' => $token], Response::HTTP_OK)->withoutCookie($cookie);
+            return response([
+                'message' => "successfully logged in",
+                'status_code' => 200,
+                'token' => $token
+            ], Response::HTTP_OK)->withoutCookie($cookie);
         } else {
             return response(['message' => 'invalid credentials'], Response::HTTP_UNAUTHORIZED);
         }
-        
-        return response()->json([
-            'message' => 'método login ok',
-        ]);
     }
 
     public function userProfile(Request $request) {
